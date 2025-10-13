@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import logging
 import sys
 from datetime import datetime
+from urllib.parse import unquote
 
 # === Setup logging ===
 LOG_FILE = f"scraper_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
@@ -25,8 +26,8 @@ logging.basicConfig(
 
 log = logging.getLogger()
 
-BASE_URL = "https://dromic.dswd.gov.ph/category/situation-reports/2017/"  # starting list page
-DOWNLOAD_DIR = "./downloads"
+BASE_URL = "https://dromic.dswd.gov.ph/category/situation-reports/2019"  # starting list page
+DOWNLOAD_DIR = "../data/dromic/2019"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 # === Setup Selenium ===
@@ -52,20 +53,48 @@ def make_direct_download_link(url: str):
         return f"https://docs.google.com/document/d/{file_id}/export?format=docx"
     return url
 
-def sanitize_filename(name: str):
-    """Remove invalid filesystem characters."""
-    return re.sub(r'[<>:"/\\|?*]+', '', name).strip()
-
 def download_file(url: str, filename_hint: str = None):
-    """Download a file from a direct link."""
+    """Download a file, preserving the actual filename from the server or URL."""
     try:
-        filename = filename_hint or url.split("/")[-1].split("?")[0]
-        filename = sanitize_filename(filename)
-        # Ensure it has an extension
+        r = requests.get(url, timeout=30, allow_redirects=True)
+
+        if r.status_code != 200:
+            log.warning(f"⚠️  Skipped (HTTP {r.status_code}): {url}")
+            return
+
+        from urllib.parse import unquote
+        filename = None
+
+        # --- Try to get filename from response headers ---
+        content_disp = r.headers.get("content-disposition", "")
+        if content_disp:
+
+            # Try RFC 5987 encoded form first (filename*=UTF-8''...)
+            match_star = re.search(r"filename\*\s*=\s*UTF-8''([^;]+)", content_disp)
+            match_normal = re.search(r'filename="?([^";]+)"?', content_disp)
+
+            if match_star:
+                filename = unquote(match_star.group(1))
+            elif match_normal:
+                filename = unquote(match_normal.group(1))
+
+        # --- If still no filename, use last part of URL ---
+        if not filename:
+            filename = os.path.basename(url.split("?")[0])
+
+        # --- Only if *still* no filename (very rare), fall back to hint ---
+        if not filename or filename.lower() in ("", "download", "viewer"):
+            filename = filename_hint or f"downloaded_{int(time.time())}"
+
+        # Only sanitize illegal filesystem characters (not spaces)
+        filename = re.sub(r'[<>:"/\\|?*]+', '', filename).strip()
+
+        # --- Guess extension if missing ---
         if not os.path.splitext(filename)[1]:
-            if ".pdf" in url:
+            ctype = r.headers.get("content-type", "")
+            if "pdf" in ctype:
                 filename += ".pdf"
-            elif ".docx" in url or "document/d/" in url:
+            elif "word" in ctype or ".doc" in url:
                 filename += ".docx"
             else:
                 filename += ".bin"
@@ -73,15 +102,13 @@ def download_file(url: str, filename_hint: str = None):
         path = os.path.join(DOWNLOAD_DIR, filename)
 
         log.info(f"⬇️  Downloading {filename}")
-        r = requests.get(url, timeout=30)
-        if r.status_code == 200 and r.headers.get("content-type", "").startswith(("application", "text/plain")):
-            with open(path, "wb") as f:
-                f.write(r.content)
-            log.info(f"✅ Saved: {filename}")
-        else:
-            log.warning(f"⚠️  Skipped (non-file or auth required): {url}")
+        with open(path, "wb") as f:
+            f.write(r.content)
+        log.info(f"✅ Saved as: {filename}")
+
     except Exception as e:
         log.error(f"❌ Error downloading {url}: {e}")
+
 
 def extract_first_download_link():
     """
