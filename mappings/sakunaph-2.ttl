@@ -66,6 +66,7 @@ sakuna:hasMunicipality rdf:type owl:ObjectProperty ;
                                                 sakuna:Impact ,
                                                 sakuna:Response ;
                                     rdfs:range sakuna:Municipality ;
+                                    rdfs:comment "Synonymous with City" ;
                                     rdfs:label "hasMunicipality"@en .
 
 
@@ -784,6 +785,7 @@ sakuna:reference rdf:type owl:DatatypeProperty ;
                               rdfs:subPropertyOf owl:topDataProperty ;
                               rdfs:domain sakuna:DisasterEvent ;
                               rdfs:range xsd:string ;
+                              rdfs:comment "Document or historical record reference from Department of Geography's archive" ;
                               rdfs:label "reference"@en .
 
 
@@ -1786,6 +1788,7 @@ sakuna:MajorEvent rdf:type owl:Class ;
                                                  owl:someValuesFrom sakuna:Incident
                                                ] ;
                                rdfs:comment "A large-scale or aggregated event spanning days that may encompass multiple locations and related incidents."^^xsd:string ;
+                               owl:disjointWith sakuna:Incident ;
                                rdfs:label "Major"@en .
 
 
@@ -1838,6 +1841,7 @@ sakuna:Municipality rdf:type owl:Class ;
 ###  https://sakuna.ph/Natural
 sakuna:Natural rdf:type owl:Class ;
                             rdfs:subClassOf sakuna:DisasterType ;
+                            owl:disjointWith sakuna:Technological ;
                             rdfs:label "Natural"@en .
 
 
