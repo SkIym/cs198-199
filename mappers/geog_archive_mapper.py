@@ -8,8 +8,8 @@ COLUMN_MAPPING = {
     "Longitude": "longitude",
     "Main Area/s Affected / Location": "hasLocation",  
     "Additional Perils/Disaster Sub-Type Occurences (Compound Disaster, e.g. Typhoon Haiyan = rain + wind + storm surge)": "hasSubtype",
-    "PREPAREDNESS_Announcements_Warnings Released / Status Alert or Alert/ State of Calamity": "State of Calamity",
-    "PREPAREDNESS_No. of Evacuation Centers": "evacuationCenters",
+    "PREPAREDNESS_Announcements_Warnings Released / Status Alert or Alert/ State of Calamity": "declarationOfCalamity",
+    "PREPAREDNESS_Evacuation_No. of Evacuation Centers": "evacuationCenters",
     "IMPACT_Number of Affected Areas_Barangays": "affectedBarangays",
     "IMPACT_Casualties_Dead_Total": "dead",
     "IMPACT_Casualties_Injured_Total": "injured",
@@ -23,26 +23,28 @@ COLUMN_MAPPING = {
     "IMPACT_Damages to Properties_Infrastructure (in Millions)": "infraDamageAmount",
     "IMPACT_Damages to Properties_Agriculture (in Millions)": "agricultureDamageAmount",
     "IMPACT_Damages to Properties_Private/Commercial (in Millions)": "commercialDamageAmount",
-    "IMPACT_Status of Lifelines_Electricity or Power Supply": "PowerAffected",
-    "IMPACT_Status of Lifelines_Communication Lines": "CommunicationAffected",
-    "IMPACT_Status of Lifelines_Transportation_Roads and Bridges": "RoadAndBridgesAffected",
-    "IMPACT_Status of Lifelines_Transportation_Seaports": "SeaportsAffected",
-    "IMPACT_Status of Lifelines_Transportation_Airports": "AirportsAffected",
+    "IMPACT_Status of Lifelines_Electricity or Power Supply": "powerAffected",
+    "IMPACT_Status of Lifelines_Communication Lines": "communicationAffected",
+    "IMPACT_Status of Lifelines_Transportation_Roads and Bridges": "roadAndBridgesAffected",
+    "IMPACT_Status of Lifelines_Transportation_Seaports": "seaportsAffected",
+    "IMPACT_Status of Lifelines_Transportation_Airports": "airportsAffected",
     "IMPACT_Status of Lifelines_Water_Dams and other Reservoirs": "areDamsAffected",
     "IMPACT_Status of Lifelines_Water_Tap": "isTapAffected",
-    "Allocated Funds for the Affected Area/s": "allocatedFunds",
-    "NGO-LGU Support Units Present": "agencyLGUsPresent",
-    "International Organizations Present": "internationalOrgsPresent",
-    "Amount of Donation from International Organizations (including local NGOs)": "amoungNGOs",
-    "Supply of Relief Goods_Canned Goods, Rice, etc._Cost": "itemCost",    # itemTypeOrNeeds: Canned Goods, Rice
-    "Supply of Relief Goods_Canned Goods, Rice, etc._Quantity": "itemQty", # itemTypeOrNeeds: Canned Goods, Rice
-    "Supply of Relief Goods_Water_Cost": "itemCost",    # itemTypeOrNeeds: Water
-    "Supply of Relief Goods_Water_Quantity": "itemQty", # itemTypeOrNeeds: Water
-    "Supply of Relief Goods_Clothing_Cost": "itemCost",    # itemTypeOrNeeds: Clothing
-    "Supply of Relief Goods_Clothing_Quantity": "itemQty", # itemTypeOrNeeds: Clothing
-    "Supply of Relief Goods_Medicine_Cost": "itemCost",    # itemTypeOrNeeds: Medicine
-    "Supply of Relief Goods_Medicine_Quantity": "itemQty", # itemTypeOrNeeds: Medicine
-    "Supply of Relief Goods_Items Not Specified (Cost)": "itemCost", # itemTypeTypeOrNeeds: Others
+    "RESPONSE AND RECOVERY_Allocated Funds for the Affected Area/s": "allocatedFunds",
+    "RESPONSE AND RECOVERY_NGO-LGU Support Units Present": "agencyLGUsPresent",
+    "RESPONSE AND RECOVERY_International Organizations Present": "internationalOrgsPresent",
+    "RESPONSE AND RECOVERY_Amount of Donation from International Organizations (including local NGOs)": "amoungNGOs",
+    "RESPONSE AND RECOVERY_Supply of Relief Goods_Canned Goods, Rice, etc._Cost": "itemCostGoods",    # itemTypeOrNeeds: Canned Goods, Rice
+    "RESPONSE AND RECOVERY_Supply of Relief Goods_Canned Goods, Rice, etc._Quantity": "itemQtyGoods", # itemTypeOrNeeds: Canned Goods, Rice
+    "RESPONSE AND RECOVERY_Supply of Relief Goods_Water_Cost": "itemCostWater",    # itemTypeOrNeeds: Water
+    "RESPONSE AND RECOVERY_Supply of Relief Goods_Water_Quantity": "itemQtyWater", # itemTypeOrNeeds: Water
+    "RESPONSE AND RECOVERY_Supply of Relief Goods_Clothing_Cost": "itemCostClothing",    # itemTypeOrNeeds: Clothing
+    "RESPONSE AND RECOVERY_Supply of Relief Goods_Clothing_Quantity": "itemQtyClothing", # itemTypeOrNeeds: Clothing
+    "RESPONSE AND RECOVERY_Supply of Relief Goods_Medicine_Cost": "itemCostMedicine",    # itemTypeOrNeeds: Medicine
+    "RESPONSE AND RECOVERY_Supply of Relief Goods_Medicine_Quantity": "itemQtyMedicine", # itemTypeOrNeeds: Medicine
+    "RESPONSE AND RECOVERY_Supply of Relief Goods_Items Not Specified (Cost)": "itemCostOthers", # itemTypeTypeOrNeeds: Others
+    "REFERENCES (Authors. Year. Title. Journal/Book/Newspaper. Publisher, Place published. Pages. Website, Date Accessed)": "reference",
+    "Detailed Description of Disaster Event": "OTHER [magnitude, remarks]"
 
 }
 
@@ -52,16 +54,38 @@ COLUMNS_TO_CLEAN = {
 }
 
 def load_with_tiered_headers(path):
-    # Read first 3 rows as headers (0,1,2)
-    df = pd.read_excel(path, header=[0, 1, 2])
+    """
+    Load XLSX with 3–4 tier headers.
+    Automatically stops merging deeper levels when columns become 'Unnamed'.
+    """
+    df = pd.read_excel(path, header=[3,4,5,6], nrows=50)
 
-    # Build merged header strings
-    df.columns = [
-        "_".join([str(x) for x in col if str(x) != "nan"]).strip()
-        for col in df.columns
-    ]
+    new_cols = []
+    for col_tuple in df.columns:
 
+        cleaned = []
+        for level in col_tuple:
+            s = str(level).strip()
+
+            if s.lower().startswith("unnamed") or s == "" or s == "nan":
+                break  
+
+            cleaned.append(s)
+
+        merged = "_".join(cleaned)
+
+        new_cols.append(merged)
+
+    df.columns = new_cols
     return df
 
-df = load_with_tiered_headers("disaster_report.xlsx")
+df = load_with_tiered_headers("../../data/geog-archive.xlsx")
 df = df.rename(columns=COLUMN_MAPPING)
+
+# print("\n=== XLSX column names ===")
+# for col in df.columns:
+#     print(col)
+
+df = df[list(COLUMN_MAPPING.values())]
+df = df.dropna(how='all')
+df.to_csv('gda.csv', index=True)
