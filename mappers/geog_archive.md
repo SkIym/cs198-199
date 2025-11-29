@@ -1,4 +1,8 @@
 To clean:
 - Location (City/Municipality, Province, Region, etc.)
-- Date and Time (startDate, endDate)
+- Time
 - Disaster Type / Subtype
+
+
+DONE:
+- Date
