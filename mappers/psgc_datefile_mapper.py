@@ -8,7 +8,7 @@ provinces_shp_path = "../shapefiles/PH_Adm2_ProvDists.shp"
 municities_shp_path = "../shapefiles/PH_Adm3_MuniCities.shp"
 
 gdf_regions = gpd.read_file(regions_shp_path, layer='PH_Adm1_Regions.shp')
-# gdf_provinces = gpd.read_file(provinces_shp_path, layer='PH_Adm2_ProvDists.shp')
+gdf_provinces = gpd.read_file(provinces_shp_path, layer='PH_Adm2_ProvDists.shp')
 # gdf_municities = gpd.read_file(municities_shp_path, layer='PH_Adm3_MuniCities.shp')
 
 
@@ -17,6 +17,7 @@ SKG = Namespace("https://sakuna.ph/")
 
 g.bind("", SKG)
 
+gdf_regions['geometry'] = gdf_regions.simplify(tolerance=0.001, preserve_topology=True)
 
 # print(gpd.list_layers(regions_shp_path))
 
@@ -24,10 +25,12 @@ g.bind("", SKG)
 
 for _, row in gdf_regions.iterrows():
 
-    # print(row)
-    # print("-----------------")
+    print(row['adm1_en'])
+    print("-----------------")
 
-    uri = URIRef(SKG[row['adm1_en'].replace(" ", "_")]) # Location URI
+    name = row['adm1_en'].split(" (", 1)
+
+    uri = URIRef(SKG[name[0].replace(" ", "_")]) # Location URI
     psgc = row['adm1_psgc']
     admLevel = "Region"
 
@@ -36,32 +39,49 @@ for _, row in gdf_regions.iterrows():
     g.add((uri, URIRef(SKG["psgc"]), Literal(psgc)))
     g.add((uri, URIRef(SKG["admLevel"]), Literal(admLevel)))
 
+    # geom_wkt = row['geometry'].wkt
+    # geom_uri = URIRef(SKG[row['adm1_en'].replace(" ", "_")] + "_geom")
 
-    geom_wkt = row['geometry'].wkt
-    geom_uri = URIRef(SKG[row['adm1_en'].replace(" ", "_")] + "_geom")
+    # g.add((geom_uri, RDF.type, GEO.Geometry))
+    # g.add((geom_uri, GEO.asWKT, Literal(geom_wkt)))
 
-    g.add((geom_uri, RDF.type, GEO.Geometry))
-    g.add((geom_uri, GEO.asWKT, geom_wkt))
-
-    g.add((uri, GEO.hasGeometry, geom_uri))
-
-
-g.serialize(destination='regions.ttl')
+    # g.add((uri, GEO.hasGeometry, geom_uri))
 
 
 # ===================== PROVINCES
 
-# for _, row in gdf_provinces.iterrows():
+for _, row in gdf_provinces.iterrows():
 
-#     print(row)
+    if row["adm2_en"] is None:
+        continue
 
-#     uri = URIRef(SKG[row['adm2_en'].replace(" ", "_")]) # Location URI
-#     psgc = row['adm2_psgc']
-#     admLevel = "Province"
-#     geom_wkt = row['geometry'].wkt
+    print(row["adm2_en"])
+    print("-----------------")
 
-#     print("-----------------")
 
+    uri = URIRef(SKG[row['adm2_en'].replace(" ", "_")]) # Location URI
+    psgc = row['adm2_psgc']
+    admLevel = "Province" if row['geo_level'] == "Prov" else "District"
+
+    g.add((uri, RDF.type, SKG["Province"]))
+    g.add((uri, RDFS.label, Literal(row['adm2_en'])))
+    g.add((uri, URIRef(SKG["psgc"]), Literal(psgc)))
+    g.add((uri, URIRef(SKG["admLevel"]), Literal(admLevel)))
+
+    parentRegion = Literal(row['adm1_psgc'])
+    for s, p, o in g.triples((None, URIRef(SKG["psgc"]), parentRegion)):
+        g.add((uri, URIRef(SKG["isPartOf"]), s))
+        
+
+    # geom_wkt = row['geometry'].wkt
+    # geom_uri = URIRef(SKG[row['adm2_en'].replace(" ", "_")] + "_geom")
+
+    # g.add((geom_uri, RDF.type, GEO.Geometry))
+    # g.add((geom_uri, GEO.asWKT, Literal(geom_wkt)))
+
+    # g.add((uri, GEO.hasGeometry, geom_uri))
+
+g.serialize(destination='regions.ttl')
 
 # ===================== MUNICIPALITIES/CITIES
 
