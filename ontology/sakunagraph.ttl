@@ -258,6 +258,7 @@ geo:hasGeometry rdf:type owl:ObjectProperty ;
 ###  https://sakuna.ph/isPartOf
 :isPartOf rdf:type owl:ObjectProperty ;
           rdfs:subPropertyOf owl:topObjectProperty ;
+          rdf:type owl:TransitiveProperty ;
           rdfs:domain [ rdf:type owl:Class ;
                         owl:unionOf ( :Barangay
                                       :Municipality
