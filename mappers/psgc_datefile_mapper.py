@@ -26,6 +26,7 @@ gdf_regions['geometry'] = gdf_regions.simplify(tolerance=0.001, preserve_topolog
 for _, row in gdf_regions.iterrows():
 
     print(row['adm1_en'])
+    print(row['adm1_psgc'])
     print("-----------------")
 
     name = row['adm1_en'].split(" (", 1)
@@ -57,8 +58,8 @@ for _, row in gdf_provinces.iterrows():
     if row["adm2_en"] is None:
         continue
 
-    print(row["adm2_en"])
-    print("-----------------")
+    # print(row["adm2_en"])
+    # print("-----------------")
 
 
     uri = URIRef(SKG[row['adm2_en'].replace(" ", "_")]) # Location URI
@@ -91,20 +92,44 @@ for _, row in gdf_municities.iterrows():
     if row["adm3_en"] is None:
         continue
 
-    print(row["adm3_en"])
-    print("-----------------")
+    # print(row["adm3_en"])
+    # print("-----------------")
 
     uri = URIRef(SKG[row['adm3_en'].replace(" ", "_")]) # Location URI
     psgc = row['adm3_psgc']
     admLevel = "Municipality" if row['geo_level'] == "Mun" else "City"
+    simURI = False
+    parentProvName = ""
+
+    # find location with similar URI, tag similar name
+    similarName = g.value(predicate=RDFS.label, object=Literal(row['adm3_en']))
+
+
+    # find parent province then attach province name if has similar name to URI to avoid duplication
+    parentProvince = Literal(row['adm2_psgc'])
+    for s, p, o in g.triples((None, URIRef(SKG["psgc"]), parentProvince)):
+
+        if similarName:
+            parentProvName = g.value(subject=s, predicate=RDFS.label)
+            uri = URIRef(SKG[row['adm3_en'].replace(" ", "_") + f"_{parentProvName.replace(" ", "_")}"])
+
+        g.add((uri, URIRef(SKG["isPartOf"]), s))
+
+    # find parent region if city is note administratively under a province
+    if row['adm2_psgc'] == row['adm3_psgc']:
+        
+        # parentRegion = Literal([row['adm1_psgc']])
+        print(f"Finding parent region for {row['adm3_en']}, psgc: {row['adm1_psgc']}")
+
+        parentRegion = g.value(predicate=URIRef(SKG['psgc']), object=Literal(row["adm1_psgc"]))
+        print(parentRegion)
+        if parentRegion:
+            g.add((uri, URIRef(SKG["isPartOf"]), parentRegion))
+            print(f"{row['adm3_en']} is part Of {parentRegion}")
 
     g.add((uri, RDF.type, SKG["Municipality"]))
     g.add((uri, RDFS.label, Literal(row['adm3_en'])))
     g.add((uri, URIRef(SKG["psgc"]), Literal(psgc)))
     g.add((uri, URIRef(SKG["admLevel"]), Literal(admLevel)))
-
-    parentProvince = Literal(row['adm2_psgc'])
-    for s, p, o in g.triples((None, URIRef(SKG["psgc"]), parentProvince)):
-        g.add((uri, URIRef(SKG["isPartOf"]), s))
 
 g.serialize(destination='regions.ttl')
