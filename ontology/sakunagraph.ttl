@@ -157,15 +157,6 @@ geo:hasGeometry rdf:type owl:ObjectProperty ;
              rdfs:label "has barangay"@en .
 
 
-###  https://sakuna.ph/hasCausedIncident
-:hasCausedIncident rdf:type owl:ObjectProperty ;
-                   rdfs:subPropertyOf owl:topObjectProperty ;
-                   owl:inverseOf :isCausedBy ;
-                   rdfs:domain :MajorEvent ;
-                   rdfs:range :Incident ;
-                   rdfs:label "has caused incident"@en .
-
-
 ###  https://sakuna.ph/hasImpact
 :hasImpact rdf:type owl:ObjectProperty ;
            rdfs:subPropertyOf owl:topObjectProperty ;
@@ -238,6 +229,15 @@ geo:hasGeometry rdf:type owl:ObjectProperty ;
            rdfs:label "has region"@en .
 
 
+###  https://sakuna.ph/hasRelatedIncident
+:hasRelatedIncident rdf:type owl:ObjectProperty ;
+                    rdfs:subPropertyOf owl:topObjectProperty ;
+                    owl:inverseOf :isRelatedTo ;
+                    rdfs:domain :MajorEvent ;
+                    rdfs:range :Incident ;
+                    rdfs:label "has related incident"@en .
+
+
 ###  https://sakuna.ph/hasResponse
 :hasResponse rdf:type owl:ObjectProperty ;
              rdfs:subPropertyOf owl:topObjectProperty ;
@@ -261,14 +261,6 @@ geo:hasGeometry rdf:type owl:ObjectProperty ;
          rdfs:label "has disaster type"@en .
 
 
-###  https://sakuna.ph/isCausedBy
-:isCausedBy rdf:type owl:ObjectProperty ;
-            rdfs:subPropertyOf owl:topObjectProperty ;
-            rdfs:domain :Incident ;
-            rdfs:range :MajorEvent ;
-            rdfs:label "is caused by"@en .
-
-
 ###  https://sakuna.ph/isPartOf
 :isPartOf rdf:type owl:ObjectProperty ;
           rdfs:subPropertyOf owl:topObjectProperty ;
@@ -286,6 +278,14 @@ geo:hasGeometry rdf:type owl:ObjectProperty ;
                                    )
                      ] ;
           rdfs:label "is part of"@en .
+
+
+###  https://sakuna.ph/isRelatedTo
+:isRelatedTo rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf owl:topObjectProperty ;
+             rdfs:domain :Incident ;
+             rdfs:range :MajorEvent ;
+             rdfs:label "is related to"@en .
 
 
 #################################################################
@@ -339,21 +339,21 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/affectedBarangays
 :affectedBarangays rdf:type owl:DatatypeProperty ;
                    rdfs:domain :AffectedPopulation ;
-                   rdfs:range xsd:integer ;
+                   rdfs:range xsd:int ;
                    rdfs:label "affected barangays"@en .
 
 
 ###  https://sakuna.ph/affectedFamilies
 :affectedFamilies rdf:type owl:DatatypeProperty ;
                   rdfs:domain :AffectedPopulation ;
-                  rdfs:range xsd:integer ;
+                  rdfs:range xsd:int ;
                   rdfs:label "affected families"@en .
 
 
 ###  https://sakuna.ph/affectedPersons
 :affectedPersons rdf:type owl:DatatypeProperty ;
                  rdfs:domain :AffectedPopulation ;
-                 rdfs:range xsd:integer ;
+                 rdfs:range xsd:int ;
                  rdfs:label "affected persons"@en .
 
 
@@ -474,7 +474,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 :casualties rdf:type owl:DatatypeProperty ;
             rdfs:subPropertyOf owl:topDataProperty ;
             rdfs:domain :Casualties ;
-            rdfs:range xsd:integer ;
+            rdfs:range xsd:int ;
             rdfs:label "casualties"@en .
 
 
@@ -535,7 +535,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 :dead rdf:type owl:DatatypeProperty ;
       rdfs:subPropertyOf :casualties ;
       rdfs:domain :Casualties ;
-      rdfs:range xsd:integer ;
+      rdfs:range xsd:int ;
       rdfs:label "dead"@en .
 
 
@@ -550,7 +550,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/displacedFamilies
 :displacedFamilies rdf:type owl:DatatypeProperty ;
                    rdfs:domain :AffectedPopulation ;
-                   rdfs:range xsd:integer ;
+                   rdfs:range xsd:int ;
                    rdfs:comment "Synonymous with evacuated families (in or out of centers)" ;
                    rdfs:label "displaced families"@en .
 
@@ -558,7 +558,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/displacedPersons
 :displacedPersons rdf:type owl:DatatypeProperty ;
                   rdfs:domain :AffectedPopulation ;
-                  rdfs:range xsd:integer ;
+                  rdfs:range xsd:int ;
                   rdfs:comment "Synonymous with evacuated persons (in or out of centers)" ;
                   rdfs:label "displaced persons"@en .
 
@@ -601,7 +601,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/evacuationCenters
 :evacuationCenters rdf:type owl:DatatypeProperty ;
                    rdfs:domain :PreemptiveEvacuation ;
-                   rdfs:range xsd:integer ;
+                   rdfs:range xsd:int ;
                    rdfs:label "no. of evacuation centers"@en .
 
 
@@ -623,7 +623,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/farmerFisherfolkAffected
 :farmerFisherfolkAffected rdf:type owl:DatatypeProperty ;
                           rdfs:domain :Agriculture ;
-                          rdfs:range xsd:integer ;
+                          rdfs:range xsd:int ;
                           rdfs:label "no. of farmer and fisherfolks affected"@en .
 
 
@@ -715,7 +715,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/infraQtyDamaged
 :infraQtyDamaged rdf:type owl:DatatypeProperty ;
                  rdfs:domain :Infrastructure ;
-                 rdfs:range xsd:integer ;
+                 rdfs:range xsd:int ;
                  rdfs:label "quantity of infrastructure damaged"@en .
 
 
@@ -723,14 +723,14 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 :infraUnitDamaged rdf:type owl:DatatypeProperty ;
                   rdfs:domain :Infrastructure ;
                   rdfs:range xsd:string ;
-                  rdfs:label "units of infrastruture damage"@en .
+                  rdfs:label "units of infrastructure damage"@en .
 
 
 ###  https://sakuna.ph/injured
 :injured rdf:type owl:DatatypeProperty ;
          rdfs:subPropertyOf :casualties ;
          rdfs:domain :Casualties ;
-         rdfs:range xsd:integer ;
+         rdfs:range xsd:int ;
          rdfs:label "injured"@en .
 
 
@@ -781,7 +781,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 :itemQty rdf:type owl:DatatypeProperty ;
          rdfs:subPropertyOf owl:topDataProperty ;
          rdfs:domain :Assistance ;
-         rdfs:range xsd:integer ;
+         rdfs:range xsd:int ;
          rdfs:label "item quantity"@en .
 
 
@@ -837,22 +837,22 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 :missing rdf:type owl:DatatypeProperty ;
          rdfs:subPropertyOf :casualties ;
          rdfs:domain :Casualties ;
-         rdfs:range xsd:integer ;
+         rdfs:range xsd:int ;
          rdfs:label "missing"@en .
 
 
 ###  https://sakuna.ph/motorBanca
 :motorBanca rdf:type owl:DatatypeProperty ;
             rdfs:domain :Stranded ;
-            rdfs:range xsd:integer ;
-            rdfs:label "motor banca"@en .
+            rdfs:range xsd:int ;
+            rdfs:label "no. of motor banca"@en .
 
 
 ###  https://sakuna.ph/noFamiliesAssisted
 :noFamiliesAssisted rdf:type owl:DatatypeProperty ;
                     rdfs:subPropertyOf owl:topDataProperty ;
                     rdfs:domain :Assistance ;
-                    rdfs:range xsd:integer ;
+                    rdfs:range xsd:int ;
                     rdfs:label "no. of families assisted"@en .
 
 
@@ -860,7 +860,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 :noFamiliesNeedingAssistance rdf:type owl:DatatypeProperty ;
                              rdfs:subPropertyOf owl:topDataProperty ;
                              rdfs:domain :Assistance ;
-                             rdfs:range xsd:integer ;
+                             rdfs:range xsd:int ;
                              rdfs:label "no. of families needing assistance"@en .
 
 
@@ -874,7 +874,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/numberDamaged
 :numberDamaged rdf:type owl:DatatypeProperty ;
                rdfs:domain :Infrastructure ;
-               rdfs:range xsd:integer ;
+               rdfs:range xsd:int ;
                rdfs:label "no. of damaged infrastructure"@en .
 
 
@@ -896,14 +896,14 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/partiallyDamagedHouses
 :partiallyDamagedHouses rdf:type owl:DatatypeProperty ;
                         rdfs:domain :Housing ;
-                        rdfs:range xsd:integer ;
+                        rdfs:range xsd:int ;
                         rdfs:label "partially damaged houses"@en .
 
 
 ###  https://sakuna.ph/partiallyDamagedInfrastructure
 :partiallyDamagedInfrastructure rdf:type owl:DatatypeProperty ;
                                 rdfs:domain :Agriculture ;
-                                rdfs:range xsd:integer ;
+                                rdfs:range xsd:int ;
                                 rdfs:label "partially damaged infrastructure"@en .
 
 
@@ -917,8 +917,8 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/passengers
 :passengers rdf:type owl:DatatypeProperty ;
             rdfs:domain :Stranded ;
-            rdfs:range xsd:integer ;
-            rdfs:label "passengers"@en .
+            rdfs:range xsd:int ;
+            rdfs:label "no. of passengers"@en .
 
 
 ###  https://sakuna.ph/policyChanges
@@ -976,7 +976,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 :preemptFamilies rdf:type owl:DatatypeProperty ;
                  rdfs:subPropertyOf owl:topDataProperty ;
                  rdfs:domain :PreemptiveEvacuation ;
-                 rdfs:range xsd:integer ;
+                 rdfs:range xsd:int ;
                  rdfs:label "preempt families"@en .
 
 
@@ -984,7 +984,7 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 :preemptFemales rdf:type owl:DatatypeProperty ;
                 rdfs:subPropertyOf :preemptPersons ;
                 rdfs:domain :PreemptiveEvacuation ;
-                rdfs:range xsd:integer ;
+                rdfs:range xsd:int ;
                 rdfs:label "preempt females"@en .
 
 
@@ -992,14 +992,14 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 :preemptMales rdf:type owl:DatatypeProperty ;
               rdfs:subPropertyOf :preemptPersons ;
               rdfs:domain :PreemptiveEvacuation ;
-              rdfs:range xsd:integer ;
+              rdfs:range xsd:int ;
               rdfs:label "preempt males"@en .
 
 
 ###  https://sakuna.ph/preemptPersons
 :preemptPersons rdf:type owl:DatatypeProperty ;
                 rdfs:domain :PreemptiveEvacuation ;
-                rdfs:range xsd:integer ;
+                rdfs:range xsd:int ;
                 rdfs:label "preempt persons" .
 
 
@@ -1165,8 +1165,8 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/rollingCargoes
 :rollingCargoes rdf:type owl:DatatypeProperty ;
                 rdfs:domain :Stranded ;
-                rdfs:range xsd:integer ;
-                rdfs:label "rolling cargoes"@en .
+                rdfs:range xsd:int ;
+                rdfs:label "no. of rolling cargoes"@en .
 
 
 ###  https://sakuna.ph/serviceProvider
@@ -1241,22 +1241,22 @@ geo:hasSerialization rdf:type owl:DatatypeProperty ;
 ###  https://sakuna.ph/totallyDamagedHouses
 :totallyDamagedHouses rdf:type owl:DatatypeProperty ;
                       rdfs:domain :Housing ;
-                      rdfs:range xsd:integer ;
+                      rdfs:range xsd:int ;
                       rdfs:label "totally damaged houses"@en .
 
 
 ###  https://sakuna.ph/totallyDamagedInfrastructure
 :totallyDamagedInfrastructure rdf:type owl:DatatypeProperty ;
                               rdfs:domain :Agriculture ;
-                              rdfs:range xsd:integer ;
+                              rdfs:range xsd:int ;
                               rdfs:label "totally damaged infrastructure"@en .
 
 
 ###  https://sakuna.ph/vessels
 :vessels rdf:type owl:DatatypeProperty ;
          rdfs:domain :Stranded ;
-         rdfs:range xsd:integer ;
-         rdfs:label "vessels"@en .
+         rdfs:range xsd:int ;
+         rdfs:label "no of. vessels"@en .
 
 
 #################################################################
@@ -2017,7 +2017,7 @@ geo:Geometry rdf:type owl:Class ;
 :Incident rdf:type owl:Class ;
           rdfs:subClassOf :DisasterEvent ,
                           [ rdf:type owl:Restriction ;
-                            owl:onProperty :isCausedBy ;
+                            owl:onProperty :isRelatedTo ;
                             owl:someValuesFrom :MajorEvent
                           ] ,
                           [ rdf:type owl:Restriction ;
@@ -2154,7 +2154,7 @@ geo:Geometry rdf:type owl:Class ;
 :MajorEvent rdf:type owl:Class ;
             rdfs:subClassOf :DisasterEvent ,
                             [ rdf:type owl:Restriction ;
-                              owl:onProperty :hasCausedIncident ;
+                              owl:onProperty :hasRelatedIncident ;
                               owl:someValuesFrom :Incident
                             ] ;
             rdfs:comment "A large-scale or aggregated event spanning days that may encompass multiple locations and related incidents." ;

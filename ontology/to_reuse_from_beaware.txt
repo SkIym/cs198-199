@@ -1,0 +1,22 @@
+to copy
+
+=== Equivalent or Replace
+-> new
+[in progress]
+
+Impact === Impact
+Incident === Incident
+Location === Location
+Natural Disaster === Disaster Event
+
+has disaster location === has incident location === has location 
+is location of disaster === is location of incident ->
+
+is of disaster type === has disaster type
+has disaster occurence ->
+
+has incident impact === has disaster impact === has impact
+
+
+impact type class is brnached out into the ones currently
+
